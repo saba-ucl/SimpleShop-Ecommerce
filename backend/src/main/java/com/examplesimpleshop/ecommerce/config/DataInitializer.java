@@ -5,11 +5,13 @@ import com.examplesimpleshop.ecommerce.entity.Product;
 import com.examplesimpleshop.ecommerce.entity.Role;
 import com.examplesimpleshop.ecommerce.entity.User;
 import com.examplesimpleshop.ecommerce.repository.CategoryRepository;
+import com.examplesimpleshop.ecommerce.repository.OrderRepository;
 import com.examplesimpleshop.ecommerce.repository.ProductRepository;
 import com.examplesimpleshop.ecommerce.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -21,7 +23,8 @@ public class DataInitializer {
     @Bean
     CommandLineRunner loadSampleData(CategoryRepository categoryRepository,
                                      ProductRepository productRepository,
-                                     UserRepository userRepository) {
+                                     UserRepository userRepository,
+                                     OrderRepository orderRepository) {
         return args -> {
             if (categoryRepository.count() == 0) {
                 Category electronics = categoryRepository.save(new Category("Electronics", "Gadgets and electronic devices"));
@@ -159,7 +162,13 @@ public class DataInitializer {
 
             if (userRepository.count() == 0) {
                 userRepository.save(new User("SimpleShop Admin", "admin@example.com", "admin123", Role.ADMIN));
-                userRepository.save(new User("Demo User", "user@example.com", "user123", Role.USER));
+                User demoUser = userRepository.save(new User("Demo User", "user@example.com", "user123", Role.USER));
+
+                // 40 extra customers and about 250 orders - see SampleOrderGenerator.java
+                if (orderRepository.count() == 0) {
+                    SampleOrderGenerator.create(userRepository, orderRepository,
+                            productRepository.findAll(Sort.by("id")), demoUser);
+                }
             }
         };
     }
