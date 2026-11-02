@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { formatPrice } from '../utils/currency';
 
 function Cart({ cart, onIncrease, onDecrease, onRemove, onClear }) {
   const total = cart.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
@@ -42,7 +43,7 @@ function Cart({ cart, onIncrease, onDecrease, onRemove, onClear }) {
                         <div><div className="fw-semibold">{item.product.name}</div><div className="small text-secondary">{item.product.category?.name}</div></div>
                       </div>
                     </td>
-                    <td>₹{Number(item.product.price).toLocaleString('en-IN')}</td>
+                    <td>{formatPrice(Number(item.product.price))}</td>
                     <td>
                       <div className="btn-group btn-group-sm" role="group">
                         <button className="btn btn-outline-secondary" onClick={() => onDecrease(item.product.id)}>−</button>
@@ -50,7 +51,7 @@ function Cart({ cart, onIncrease, onDecrease, onRemove, onClear }) {
                         <button className="btn btn-outline-secondary" onClick={() => onIncrease(item.product.id)} disabled={item.quantity >= item.product.stock}>+</button>
                       </div>
                     </td>
-                    <td className="fw-semibold">₹{(Number(item.product.price) * item.quantity).toLocaleString('en-IN')}</td>
+                    <td className="fw-semibold">{formatPrice(Number(item.product.price) * item.quantity)}</td>
                     <td><button className="btn btn-link text-danger text-decoration-none" onClick={() => onRemove(item.product.id)}>Remove</button></td>
                   </tr>
                 ))}
@@ -65,7 +66,7 @@ function Cart({ cart, onIncrease, onDecrease, onRemove, onClear }) {
               <div className="d-flex justify-content-between mt-3"><span>Items</span><span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span></div>
               <div className="d-flex justify-content-between mt-2"><span>Delivery</span><span className="text-success">Free</span></div>
               <hr />
-              <div className="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>₹{total.toLocaleString('en-IN')}</span></div>
+              <div className="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>{formatPrice(total)}</span></div>
               <Link to="/checkout" className="btn btn-primary w-100 mt-4">Proceed to Checkout</Link>
             </div>
           </div>

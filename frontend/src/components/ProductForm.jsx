@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BASE_CURRENCY } from '../utils/currency';
 
 const emptyForm = {
   name: '',
@@ -48,7 +49,7 @@ function ProductForm({ categories, initialProduct, onSubmit, submitLabel }) {
           <input className="form-control" name="name" value={form.name} onChange={handleChange} required />
         </div>
         <div className="col-md-3">
-          <label className="form-label">Price (₹)</label>
+          <label className="form-label">Price ({BASE_CURRENCY})</label>
           <input className="form-control" type="number" min="0" step="0.01" name="price" value={form.price} onChange={handleChange} required />
         </div>
         <div className="col-md-3">

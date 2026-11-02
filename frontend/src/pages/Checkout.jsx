@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createOrder } from '../services/api';
 import ErrorMessage from '../components/ErrorMessage';
+import { formatPrice } from '../utils/currency';
 
 function Checkout({ user, cart, onClear }) {
   const navigate = useNavigate();
@@ -60,11 +61,11 @@ function Checkout({ user, cart, onClear }) {
               <div className="row g-3">
                 <div className="col-md-6"><label className="form-label">Customer Name</label><input className="form-control" name="customerName" value={form.customerName} onChange={handleChange} required /></div>
                 <div className="col-md-6"><label className="form-label">Email</label><input className="form-control" type="email" name="email" value={form.email} onChange={handleChange} required /></div>
-                <div className="col-md-6"><label className="form-label">Phone</label><input className="form-control" name="phone" value={form.phone} onChange={handleChange} pattern="[0-9]{10}" title="Enter a 10-digit phone number" required /></div>
+                <div className="col-md-6"><label className="form-label">Phone</label><input className="form-control" name="phone" value={form.phone} onChange={handleChange} type="tel" placeholder="12 34 56 78" pattern="(\+[0-9]{1,3} ?)?[0-9 ]{8,14}" title="Enter a phone number with at least 8 digits, e.g. 12 34 56 78 or +45 12345678" required /></div>
                 <div className="col-12"><label className="form-label">Address</label><textarea className="form-control" rows="3" name="address" value={form.address} onChange={handleChange} required></textarea></div>
                 <div className="col-md-4"><label className="form-label">City</label><input className="form-control" name="city" value={form.city} onChange={handleChange} required /></div>
-                <div className="col-md-4"><label className="form-label">State</label><input className="form-control" name="state" value={form.state} onChange={handleChange} required /></div>
-                <div className="col-md-4"><label className="form-label">Pincode</label><input className="form-control" name="pincode" value={form.pincode} onChange={handleChange} pattern="[0-9]{6}" title="Enter a 6-digit pincode" required /></div>
+                <div className="col-md-4"><label className="form-label">Region</label><input className="form-control" name="state" value={form.state} onChange={handleChange} required /></div>
+                <div className="col-md-4"><label className="form-label">Postal Code</label><input className="form-control" name="pincode" value={form.pincode} onChange={handleChange} placeholder="2100" pattern="[0-9]{4,6}" title="Enter a postal code with 4-6 digits, e.g. 2100" required /></div>
               </div>
 
               <div className="alert alert-light border mt-4 mb-0">
@@ -84,11 +85,11 @@ function Checkout({ user, cart, onClear }) {
               {cart.map((item) => (
                 <div className="d-flex justify-content-between gap-3 mt-3" key={item.product.id}>
                   <span>{item.product.name} × {item.quantity}</span>
-                  <span className="fw-semibold">₹{(Number(item.product.price) * item.quantity).toLocaleString('en-IN')}</span>
+                  <span className="fw-semibold">{formatPrice(Number(item.product.price) * item.quantity)}</span>
                 </div>
               ))}
               <hr />
-              <div className="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>₹{total.toLocaleString('en-IN')}</span></div>
+              <div className="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>{formatPrice(total)}</span></div>
             </div>
           </div>
         </div>

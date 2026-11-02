@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getOrdersByUser } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
+import { formatPrice } from '../utils/currency';
 
 function MyOrders({ user }) {
   const [orders, setOrders] = useState([]);
@@ -37,8 +38,8 @@ function MyOrders({ user }) {
                     <span className={`badge ${order.status === 'DELIVERED' ? 'text-bg-success' : order.status === 'CANCELLED' ? 'text-bg-danger' : 'text-bg-warning'}`}>{order.status}</span>
                   </div>
                   <hr />
-                  {order.items.map((item) => <div className="d-flex justify-content-between small mb-2" key={item.id}><span>{item.product.name} × {item.quantity}</span><span>₹{Number(item.price).toLocaleString('en-IN')}</span></div>)}
-                  <div className="d-flex justify-content-between fw-bold mt-3"><span>Total</span><span>₹{Number(order.totalAmount).toLocaleString('en-IN')}</span></div>
+                  {order.items.map((item) => <div className="d-flex justify-content-between small mb-2" key={item.id}><span>{item.product.name} × {item.quantity}</span><span>{formatPrice(Number(item.price))}</span></div>)}
+                  <div className="d-flex justify-content-between fw-bold mt-3"><span>Total</span><span>{formatPrice(Number(order.totalAmount))}</span></div>
                   <Link to={`/orders/${order.id}`} className="btn btn-outline-primary btn-sm mt-3">View Details</Link>
                 </div>
               </div>

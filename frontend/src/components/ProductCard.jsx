@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { formatPrice } from '../utils/currency';
 
 function ProductCard({ product, onAddToCart }) {
   const outOfStock = product.stock <= 0;
@@ -24,7 +25,7 @@ function ProductCard({ product, onAddToCart }) {
             : product.description}
         </p>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <span className="fw-bold fs-5">₹{Number(product.price).toLocaleString('en-IN')}</span>
+          <span className="fw-bold fs-5">{formatPrice(Number(product.price))}</span>
           <span className={`small ${outOfStock ? 'text-danger' : 'text-success'}`}>
             {outOfStock ? 'Out of Stock' : `${product.stock} left`}
           </span>

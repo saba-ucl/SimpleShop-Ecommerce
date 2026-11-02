@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getProduct } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
+import { formatPrice } from '../utils/currency';
 
 function ProductDetails({ onAddToCart }) {
   const { id } = useParams();
@@ -35,7 +36,7 @@ function ProductDetails({ onAddToCart }) {
           <span className="badge text-bg-light mb-2">{product.category?.name}</span>
           <h1 className="display-6 fw-bold">{product.name}</h1>
           <p className="text-secondary fs-5">{product.description}</p>
-          <div className="fs-2 fw-bold mb-2">₹{Number(product.price).toLocaleString('en-IN')}</div>
+          <div className="fs-2 fw-bold mb-2">{formatPrice(Number(product.price))}</div>
           <p className={outOfStock ? 'text-danger fw-semibold' : 'text-success fw-semibold'}>
             {outOfStock ? 'Out of Stock' : `${product.stock} items available`}
           </p>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { deleteProduct, getProducts } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
+import { formatPrice } from '../utils/currency';
 
 function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -50,7 +51,7 @@ function AdminProducts() {
                   <td><img className="admin-thumb" src={product.imageUrl} alt={product.name} /></td>
                   <td><div className="fw-semibold">{product.name}</div><div className="small text-secondary">ID: {product.id}</div></td>
                   <td>{product.category?.name}</td>
-                  <td>₹{Number(product.price).toLocaleString('en-IN')}</td>
+                  <td>{formatPrice(Number(product.price))}</td>
                   <td>{product.stock}</td>
                   <td>
                     <div className="d-flex gap-2">

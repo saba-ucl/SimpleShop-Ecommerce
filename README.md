@@ -1,6 +1,6 @@
 # SimpleShop — Beginner E-Commerce Website
 
-SimpleShop is a beginner-friendly full-stack e-commerce website built with React.js, Bootstrap 5, Spring Boot, Spring Data JPA, Hibernate and MySQL.
+SimpleShop is a beginner-friendly full-stack e-commerce website built with React.js, Bootstrap 5, Spring Boot, Spring Data JPA, Hibernate and H2 (in memory database).
 
 The goal is to demonstrate a realistic college project without introducing advanced technologies such as microservices, Docker, Kafka, Redis, GraphQL, Redux, OAuth or a complex JWT/security system.
 
@@ -27,7 +27,7 @@ Spring Data JPA Repository
       ↓
 Hibernate
       ↓
-MySQL
+H2
 ```
 
 ---
@@ -86,7 +86,7 @@ PENDING → CONFIRMED → SHIPPED → DELIVERED
 | Language | Java 17 |
 | REST | Spring Web |
 | ORM | Spring Data JPA + Hibernate |
-| Database | MySQL |
+| Database | H2 |
 | Build | Maven 3.9.11 bootstrap scripts |
 
 The project pins concrete versions so the setup is predictable. For a college project, keeping the same major versions on another PC is recommended.
@@ -104,9 +104,10 @@ The project pins concrete versions so the setup is predictable. For a college pr
 - Eclipse IDE for Enterprise Java and Web Developers (recent release)
 - Node.js 24 LTS recommended
 - npm included with Node.js
-- MySQL 8.x or a compatible recent MySQL release
 - Google Chrome, Microsoft Edge or Firefox
 - Internet connection for first-time Maven/npm dependency downloads
+
+No separate database installation is needed. The project uses **H2**, a small Java database that runs inside the Spring Boot application.
 
 ### Recommended for a comfortable experience
 
@@ -114,7 +115,6 @@ The project pins concrete versions so the setup is predictable. For a college pr
 - SSD storage
 - JDK 17 LTS
 - Node.js 24 LTS
-- MySQL 8.x
 - Recent Eclipse IDE for Enterprise Java and Web Developers
 
 ---
@@ -130,7 +130,6 @@ Run these commands in Command Prompt / PowerShell / Terminal.
 | Maven | `mvn -version` | Maven installation |
 | Node.js | `node -v` | Node.js version |
 | npm | `npm -v` | npm version |
-| MySQL | `mysql --version` | MySQL client version |
 
 ### Expected project baseline
 
@@ -139,7 +138,6 @@ Java: 17.x
 Node.js: 24.x LTS recommended
 npm: installed with Node.js
 Maven: 3.6.3+ supported; wrapper bootstraps 3.9.11 when possible
-MySQL: 8.x recommended
 ```
 
 Spring Boot 3.5.x supports Java 17+ and Maven 3.6.3+. Node.js 24.x is the recommended LTS line for this project.
@@ -184,7 +182,7 @@ SimpleShop-Ecommerce/
 │   └── README.md
 │
 ├── database/
-│   └── ecommerce.sql
+│   └── ecommerce.sql   (reference only; not needed to run)
 │
 ├── screenshots/
 │   └── README.md
@@ -196,60 +194,20 @@ The ZIP intentionally does not contain `node_modules`, `target`, `.classpath` or
 
 ---
 
-## 7. MySQL Installation
+## 7. Database (H2)
 
-Install MySQL Community Server and MySQL Workbench if you want a GUI.
+SimpleShop uses **H2**, an in-memory database that runs inside the Spring Boot backend.
 
-During installation, remember the MySQL `root` password you choose.
+- Nothing to install, no password to set and no database to create.
+- The database starts when the backend starts.
+- Hibernate creates the tables automatically from the entity classes.
+- Sample products, categories and users are inserted automatically on every startup.
 
-### Check installation
+### Important: data is temporary
 
-```bash
-mysql --version
-```
+The database lives in memory. **Everything is reset when you stop or restart the backend.** Products, users and orders you add while testing disappear, and the original sample data comes back.
 
-If it says the command is not recognized, MySQL may not be installed or its `bin` directory is not in PATH.
-
-On Windows, the MySQL client commonly lives under a folder similar to:
-
-```text
-C:\Program Files\MySQL\MySQL Server 8.x\bin
-```
-
-You can either add that folder to Windows PATH or use MySQL Workbench instead.
-
-### Check that MySQL is running
-
-Open MySQL Workbench and connect to your local server.
-
-Or, on Windows, open **Services** and look for a MySQL service.
-
----
-
-## 8. Database Creation
-
-Open MySQL Workbench or MySQL command line.
-
-Run:
-
-```sql
-CREATE DATABASE ecommerce_db;
-```
-
-Optional:
-
-```sql
-SHOW DATABASES;
-USE ecommerce_db;
-```
-
-You can also run the included file:
-
-```text
-database/ecommerce.sql
-```
-
-For the normal project flow, you only need to create the empty database because Hibernate/JPA creates the tables from the entity classes.
+This is intentional for a classroom: every student starts from the same clean state.
 
 ### Why is `ddl-auto=update` used?
 
@@ -257,41 +215,77 @@ For the normal project flow, you only need to create the empty database because 
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-It tells Hibernate to compare the Java entity model with the database schema and create/update tables as needed during development. It is convenient for a college project. It is not a substitute for proper production database migration tooling.
+It tells Hibernate to compare the Java entity model with the database schema and create/update tables as needed during development. With an empty in-memory database, this means Hibernate creates all tables at startup. It is not a substitute for proper production database migration tooling.
+
+The file `database/ecommerce.sql` shows the table structure as plain SQL for reference. You do not need to run it.
+
+---
+
+## 8. H2 Console — See the Tables in Your Browser
+
+While the backend is running, open:
+
+```text
+http://localhost:8181/h2-console
+```
+
+On the login screen, enter exactly:
+
+| Field | Value |
+|---|---|
+| Driver Class | `org.h2.Driver` |
+| JDBC URL | `jdbc:h2:mem:ecommerce_db` |
+| User Name | `sa` |
+| Password | *(leave empty)* |
+
+Click **Connect**. You can now browse the tables (`PRODUCTS`, `CATEGORIES`, `USERS`, `ORDERS`, `ORDER_ITEMS`) and run SQL, for example:
+
+```sql
+SELECT * FROM PRODUCTS;
+```
+
+**Common mistake:** the JDBC URL field is pre-filled with `jdbc:h2:~/test`. If you don't change it, you connect to a different, empty database and see no tables.
 
 ---
 
 ## 9. Backend Setup
 
-Open:
+The backend is already configured. You don't need to change anything.
 
-```text
-SimpleShop-Ecommerce/backend/src/main/resources/application.properties
-```
-
-Set your MySQL credentials:
+For reference, `backend/src/main/resources/application.properties` contains:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
+spring.application.name=simpleshop-backend
 
+# H2 in-memory database
+spring.datasource.url=jdbc:h2:mem:ecommerce_db;DB_CLOSE_DELAY=-1
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Hibernate creates the tables automatically
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
 
-server.port=8080
+# H2 console in the browser
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Server - only reachable from your own computer
+server.port=8181
+server.address=127.0.0.1
 ```
 
-Replace only:
+And `backend/pom.xml` includes the H2 driver:
 
-```text
-YOUR_PASSWORD
+```xml
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
 ```
 
-with your own local MySQL password.
-
-Do **not** commit your real password to GitHub.
+`server.address=127.0.0.1` means only your own computer can reach the backend and the H2 console. Other devices on the same Wi-Fi cannot.
 
 ---
 
@@ -319,10 +313,10 @@ src/main/java/com/examplesimpleshop/ecommerce/EcommerceApplication.java
 15. When startup succeeds, the server is available at:
 
 ```text
-http://localhost:8080
+http://localhost:8181
 ```
 
-Spring Boot itself can run with normal Java development tools; Eclipse is not a special requirement of Spring Boot. citeturn115545search9
+Spring Boot itself can run with normal Java development tools; Eclipse is not a special requirement of Spring Boot.
 
 ---
 
@@ -371,6 +365,26 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 ```
 
 Bootstrap 5.3.8 is pinned in `package.json` for predictable installation.
+
+---
+
+## 12b. Currency
+
+All prices are stored in **Danish kroner (DKK)**, including the sample products and the price you type in the admin product form.
+
+The frontend shows prices in DKK by default. To show them in euro or Indian rupees instead, open:
+
+```text
+frontend/src/utils/currency.js
+```
+
+and change one line:
+
+```javascript
+export const DISPLAY_CURRENCY = 'DKK'; // 'DKK' | 'EUR' | 'INR'
+```
+
+Prices are converted from DKK using fixed, approximate demo exchange rates defined in the same file. Restart `npm start` after changing it.
 
 ---
 
@@ -427,19 +441,19 @@ The Vite script is intentionally named `start` so it matches the beginner-friend
 
 Use this order:
 
-1. Start MySQL.
-2. Start the Spring Boot backend.
-3. Confirm backend is using port 8080.
-4. Start React with `npm start`.
-5. Open `http://localhost:3000`.
-6. Browse products.
-7. Register/login.
-8. Add a product to the cart.
-9. Checkout.
-10. Check My Orders.
-11. Login with the admin account.
-12. Test product/category CRUD.
-13. Test order status changes.
+1. Start the Spring Boot backend.
+2. Confirm backend is using port 8181.
+3. Start React with `npm start`.
+4. Open `http://localhost:3000`.
+5. Browse products.
+6. Register/login.
+7. Add a product to the cart.
+8. Checkout.
+9. Check My Orders.
+10. Login with the admin account.
+11. Test product/category CRUD.
+12. Test order status changes.
+13. Optional: open the H2 console and check that your new order appears in the `ORDERS` table.
 
 ---
 
@@ -544,7 +558,7 @@ The cart is maintained in browser localStorage for simplicity.
 
 ## 19. Sample Login Credentials
 
-These accounts are inserted automatically the first time the database is empty.
+These accounts are inserted automatically every time the backend starts (the in-memory database always starts empty).
 
 ```yaml
 Admin:
@@ -562,9 +576,9 @@ New registrations always receive the `USER` role. This prevents a normal registr
 
 ## 20. Common Errors
 
-### Error: Port 8080 already in use
+### Error: Port 8181 already in use
 
-Another application is already using port 8080.
+Another application is already using port 8181.
 
 Solutions:
 
@@ -574,7 +588,7 @@ Solutions:
 Example:
 
 ```properties
-server.port=8081
+server.port=8182
 ```
 
 If you change the backend port, also change the frontend API URL in:
@@ -585,28 +599,21 @@ frontend/src/services/api.js
 
 ---
 
-### Error: Access denied for user 'root'
+### Error: Cannot load driver class: org.h2.Driver
 
-Your MySQL username/password is wrong.
-
-Check:
-
-```properties
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
-```
-
-Use the actual password created during MySQL installation.
+The H2 dependency is missing at runtime. In `backend/pom.xml`, check that the H2 dependency has `<scope>runtime</scope>` (not `test`). Then in Eclipse choose **Maven → Update Project** and restart the backend.
 
 ---
 
-### Error: Unknown database 'ecommerce_db'
+### H2 console shows no tables
 
-Create it:
+Check the **JDBC URL** on the H2 login screen. It must be:
 
-```sql
-CREATE DATABASE ecommerce_db;
+```text
+jdbc:h2:mem:ecommerce_db
 ```
+
+Not the pre-filled `jdbc:h2:~/test`. Also make sure the backend is still running: the in-memory database only exists while it runs.
 
 ---
 
@@ -627,7 +634,7 @@ npm -v
 
 ### Error: CORS error
 
-React runs on port 3000 and Spring Boot runs on port 8080, so the browser treats them as different origins.
+React runs on port 3000 and Spring Boot runs on port 8181, so the browser treats them as different origins.
 
 `CorsConfig.java` allows:
 
@@ -636,18 +643,6 @@ http://localhost:3000
 ```
 
 Make sure the React app is really using port 3000.
-
----
-
-### Error: Cannot connect to MySQL
-
-Check that:
-
-1. MySQL is installed.
-2. MySQL service is running.
-3. Port 3306 is correct.
-4. Username/password are correct.
-5. `ecommerce_db` exists.
 
 ---
 
@@ -692,20 +687,24 @@ mvnw.cmd clean test
 Check that backend is running on:
 
 ```text
-http://localhost:8080
+http://localhost:8181
 ```
 
 Then open this GET endpoint in a browser:
 
 ```text
-http://localhost:8080/api/products
+http://localhost:8181/api/products
 ```
 
 If you see JSON, the backend API is responding.
 
 ### Products table is empty
 
-The first backend startup should insert sample data. Confirm the database connection is working and check the console for SQL statements.
+Every backend startup inserts sample data. Check the backend console for errors and for `insert` SQL statements during startup.
+
+### My products/orders disappeared
+
+This is expected. H2 runs in memory, so all data is reset when the backend restarts. See section 7.
 
 ### Images are not showing
 
@@ -726,33 +725,27 @@ On the new PC:
 1. Install JDK 17.
 2. Install Eclipse IDE for Enterprise Java and Web Developers.
 3. Install Node.js 24 LTS.
-4. Install MySQL.
-5. Check:
+4. Check:
 
 ```bash
 java -version
 javac -version
-mvn -version
 node -v
 npm -v
-mysql --version
 ```
 
-6. Extract the ZIP.
-7. Create `ecommerce_db` in MySQL.
-8. Edit backend `application.properties`.
-9. Replace `YOUR_PASSWORD`.
-10. Import the backend into Eclipse as an existing Maven project.
-11. Run `EcommerceApplication.java`.
-12. Open a terminal inside `frontend`.
-13. Run:
+5. Extract the ZIP.
+6. Import the backend into Eclipse as an existing Maven project.
+7. Run `EcommerceApplication.java`.
+8. Open a terminal inside `frontend`.
+9. Run:
 
 ```bash
 npm install
 npm start
 ```
 
-14. Open:
+10. Open:
 
 ```text
 http://localhost:3000
@@ -784,9 +777,7 @@ Or, when running from terminal:
 Ctrl + C
 ```
 
-### MySQL
-
-Normally leave MySQL running while working on the project. Stop the MySQL service only when you no longer need the database.
+Stopping the backend also clears the H2 database.
 
 ---
 
@@ -820,22 +811,18 @@ node -v
 npm -v
 ```
 
-## Step 4 — Install MySQL
-
-Install MySQL Server and optionally Workbench.
-
-## Step 5 — Check all versions
+## Step 4 — Check all versions
 
 ```bash
 java -version
 javac -version
-mvn -version
 node -v
 npm -v
-mysql --version
 ```
 
-## Step 6 — Extract ZIP
+`mvn -version` is optional: the included `mvnw` scripts download Maven automatically.
+
+## Step 5 — Extract ZIP
 
 Extract:
 
@@ -843,35 +830,15 @@ Extract:
 SimpleShop-Ecommerce.zip
 ```
 
-## Step 7 — Open backend in Eclipse
+## Step 6 — Open backend in Eclipse
 
 Use **File → Import → Maven → Existing Maven Projects** and select `backend`.
 
-## Step 8 — Configure MySQL
+## Step 7 — Run backend
 
-Open:
+Run `EcommerceApplication.java` in Eclipse. No database setup is needed.
 
-```text
-backend/src/main/resources/application.properties
-```
-
-Replace:
-
-```text
-YOUR_PASSWORD
-```
-
-## Step 9 — Create database
-
-```sql
-CREATE DATABASE ecommerce_db;
-```
-
-## Step 10 — Run backend
-
-Run `EcommerceApplication.java` in Eclipse.
-
-## Step 11 — Open frontend folder
+## Step 8 — Open frontend folder
 
 Open Command Prompt/PowerShell in:
 
@@ -879,19 +846,19 @@ Open Command Prompt/PowerShell in:
 SimpleShop-Ecommerce/frontend
 ```
 
-## Step 12 — Install frontend dependencies
+## Step 9 — Install frontend dependencies
 
 ```bash
 npm install
 ```
 
-## Step 13 — Start frontend
+## Step 10 — Start frontend
 
 ```bash
 npm start
 ```
 
-## Step 14 — Open browser
+## Step 11 — Open browser
 
 ```text
 http://localhost:3000
@@ -906,7 +873,7 @@ http://localhost:3000
 Browser:
 
 ```text
-http://localhost:8080/api/products
+http://localhost:8181/api/products
 ```
 
 Expected response is a JSON array similar to:
@@ -916,7 +883,7 @@ Expected response is a JSON array similar to:
   {
     "id": 1,
     "name": "Laptop",
-    "price": 59999.00,
+    "price": 5999.00,
     "stock": 12,
     "category": {
       "id": 1,
@@ -931,7 +898,7 @@ Expected response is a JSON array similar to:
 URL:
 
 ```text
-POST http://localhost:8080/api/users/register
+POST http://localhost:8181/api/users/register
 ```
 
 Body:
@@ -947,7 +914,7 @@ Body:
 ## POST login
 
 ```text
-POST http://localhost:8080/api/users/login
+POST http://localhost:8181/api/users/login
 ```
 
 Body:
@@ -962,7 +929,7 @@ Body:
 ## POST product
 
 ```text
-POST http://localhost:8080/api/products
+POST http://localhost:8181/api/products
 ```
 
 Body:
@@ -981,7 +948,7 @@ Body:
 ## POST order
 
 ```text
-POST http://localhost:8080/api/orders
+POST http://localhost:8181/api/orders
 ```
 
 Body:
@@ -991,11 +958,11 @@ Body:
   "userId": 2,
   "customerName": "Demo User",
   "email": "user@example.com",
-  "phone": "9876543210",
-  "address": "123 Main Road",
-  "city": "Mumbai",
-  "state": "Maharashtra",
-  "pincode": "400001",
+  "phone": "12345678",
+  "address": "Nørrebrogade 1",
+  "city": "København",
+  "state": "Hovedstaden",
+  "pincode": "2200",
   "items": [
     {
       "productId": 1,
@@ -1008,7 +975,7 @@ Body:
 ## PUT order status
 
 ```text
-PUT http://localhost:8080/api/orders/1/status
+PUT http://localhost:8181/api/orders/1/status
 ```
 
 Body:
@@ -1071,7 +1038,7 @@ It demonstrates the main flow of an online store in one application:
 Browse → Search → Product Details → Cart → Checkout → Order → Order Tracking
 ```
 
-It also demonstrates how a React frontend communicates with a Java Spring Boot backend and stores data in MySQL.
+It also demonstrates how a React frontend communicates with a Java Spring Boot backend and stores data in a relational database (H2).
 
 ## Why React?
 
@@ -1085,9 +1052,9 @@ Bootstrap gives ready-made responsive classes for grids, cards, buttons, forms, 
 
 Spring Boot makes it simple to build Java web applications and REST APIs with less configuration.
 
-## Why MySQL?
+## Why H2?
 
-MySQL is a popular relational database and is suitable for structured data such as users, categories, products and orders.
+H2 is a lightweight relational database written in Java. It runs inside the Spring Boot application, so no separate database server has to be installed. It uses normal SQL tables, which suit structured data such as users, categories, products and orders. Because the project uses JPA, switching to a database server such as MySQL or PostgreSQL later mainly means changing the driver dependency and the datasource settings.
 
 ## Why JPA/Hibernate?
 
@@ -1108,7 +1075,7 @@ Repository
   ↓
 JPA / Hibernate
   ↓
-MySQL
+H2 (in-memory)
 ```
 
 ### Simple explanation
@@ -1118,7 +1085,7 @@ MySQL
 - **Service** contains application/business logic.
 - **Repository** talks to the database through JPA.
 - **Hibernate** converts Java entity operations into SQL.
-- **MySQL** stores the data permanently.
+- **H2** stores the data in memory while the backend is running.
 
 ---
 
@@ -1180,13 +1147,13 @@ A controller receives HTTP requests and returns HTTP responses.
 
 React sends HTTP requests using Axios to the Spring Boot REST API, and Spring Boot returns JSON responses.
 
-## 15. How does Spring Boot connect to MySQL?
+## 15. How does Spring Boot connect to the database?
 
-Spring Boot uses the MySQL JDBC driver, datasource settings and JPA/Hibernate to connect to MySQL.
+Spring Boot uses the H2 JDBC driver, the datasource settings in `application.properties` and JPA/Hibernate to connect to H2.
 
-## 16. What is MySQL?
+## 16. What is H2?
 
-MySQL is a relational database management system that stores data in tables.
+H2 is a relational database written in Java. In this project it runs in memory inside the backend, so the data is reset when the application restarts.
 
 ## 17. What is a primary key?
 
@@ -1247,7 +1214,7 @@ For a production application, improve at least:
 - Production error handling
 - Real payment integration
 
-Never publish your actual database password to GitHub.
+If you later switch to a real database server, never publish its password to GitHub.
 
 ---
 
@@ -1255,7 +1222,7 @@ Never publish your actual database password to GitHub.
 
 ## Verified / inspected in the generated project
 
-- The requested React/Spring Boot/MySQL file structure is present.
+- The requested React/Spring Boot file structure is present.
 - Backend package names match the directory structure.
 - REST mappings are consistent with the frontend API service.
 - Entity relationships use beginner-friendly JPA annotations.
@@ -1263,15 +1230,13 @@ Never publish your actual database password to GitHub.
 - Product/category/order/user DTOs are wired to their controllers and services.
 - React routes are connected to the requested pages.
 - Bootstrap is imported in the React entry point.
-- Frontend API URLs point to `http://localhost:8080/api`.
+- Frontend API URLs point to `http://localhost:8181/api`.
 - Frontend dev server is configured for `http://localhost:3000`.
 - Sample login credentials are implemented by the backend data initializer.
 
-## Not fully tested in this generation environment
+## Tests
 
-The execution runner currently has Java and Node.js available, but Maven and MySQL are not installed. An `npm install` attempt also did not complete because this runner could not reliably reach the external npm registry. Therefore, I did **not** claim a successful Maven compile, Spring Boot startup against MySQL, or React production build here.
-
-The project includes a Spring Boot context test with an H2 test database so that on a normal connected development machine you can run:
+The project includes a Spring Boot context test that starts the application against a separate H2 test database. Run it with:
 
 ```bash
 mvnw.cmd test
@@ -1283,16 +1248,15 @@ or:
 ./mvnw test
 ```
 
-That test is not a substitute for testing the application against a real local MySQL database.
-
 ---
 
 # Final URLs
 
 ```yaml
 Frontend: http://localhost:3000
-Backend: http://localhost:8080
-Products API: http://localhost:8080/api/products
+Backend: http://localhost:8181
+Products API: http://localhost:8181/api/products
+H2 Console: http://localhost:8181/h2-console
 Admin Dashboard: http://localhost:3000/admin
 ```
 
@@ -1303,10 +1267,8 @@ Admin Dashboard: http://localhost:3000/admin
 ```bash
 java -version
 javac -version
-mvn -version
 node -v
 npm -v
-mysql --version
 ```
 
 Backend in Eclipse:

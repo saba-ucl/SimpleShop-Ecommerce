@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getOrder } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
+import { formatPrice } from '../utils/currency';
 
 function OrderDetails() {
   const { id } = useParams();
@@ -35,10 +36,10 @@ function OrderDetails() {
               <div className="table-responsive">
                 <table className="table align-middle">
                   <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
-                  <tbody>{order.items.map((item) => <tr key={item.id}><td>{item.product.name}</td><td>{item.quantity}</td><td>₹{Number(item.price).toLocaleString('en-IN')}</td><td>₹{(Number(item.price) * item.quantity).toLocaleString('en-IN')}</td></tr>)}</tbody>
+                  <tbody>{order.items.map((item) => <tr key={item.id}><td>{item.product.name}</td><td>{item.quantity}</td><td>{formatPrice(Number(item.price))}</td><td>{formatPrice(Number(item.price) * item.quantity)}</td></tr>)}</tbody>
                 </table>
               </div>
-              <div className="text-end fw-bold fs-5">Total: ₹{Number(order.totalAmount).toLocaleString('en-IN')}</div>
+              <div className="text-end fw-bold fs-5">Total: {formatPrice(Number(order.totalAmount))}</div>
             </div>
             <div className="col-lg-5">
               <div className="bg-light rounded-4 p-4">
