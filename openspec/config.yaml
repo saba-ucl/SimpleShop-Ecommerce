@@ -1,0 +1,35 @@
+schema: spec-driven
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+context: |
+  SimpleShop is a local demo shop (Spring Boot 3 / Java 17 / in-memory H2 backend on :8181,
+  React + Vite frontend on :3000). Baseline specs describe CURRENT behavior, including known
+  quirks (no backend auth, not-found returned as 400, order status flow not enforced).
+  Changing a quirk must be an explicit requirement change, not a side effect.
+  Prices are stored in DKK. The only automated test is a Spring context-load test, so
+  tasks should include manual or curl verification steps.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
