@@ -23,7 +23,7 @@ When a product has no reviews yet, the card shows 5 greyed out stars to symboliz
 
 Only logged in customers who have the product in one or more orders with status 'Delivered' should see the review form. Non-buyers dont see anything.
 
-If a customer have multiple orders with the product in they only see one form. There is a drop down from which they can choose the order, they wish to add/edit/delete the product review for.
+A customer sees one review form. When they have more than one delivered order containing the product, the form has a dropdown to choose the order they want to add, edit or delete the review for; on page load the form shows the latest of those orders. With exactly one such order there is no dropdown: the form is for that order and shows its existing review, if any.
 
 Reviews are listed with newest first.
 

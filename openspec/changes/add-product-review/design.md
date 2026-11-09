@@ -64,8 +64,25 @@ Constraints from the current code:
 - New components: `StarRating` (read-only full, half and empty stars from a value; greyed variant for no reviews), `ReviewList`, `ReviewForm`.
 - `ProductCard` gets a rating line below the price/stock row. `Products` and `Home` (wherever `ProductCard` is used) load the summary once and pass each product's entry down.
 - `ProductDetails` renders `ReviewForm` below the "Add to Cart" button and `ReviewList` at the bottom.
-- `ReviewForm` visibility is decided on the client. It reads the logged-in user from localStorage, calls `getOrdersByUser`, and keeps orders with status `DELIVERED` that contain the product. If none, it renders nothing. If there are several, one dropdown selects the order. Choosing an order pre-fills the form from the product's reviews matched by `orderId`, and shows Save and Delete when a review exists, otherwise Submit. A required rating is checked in the browser before submitting.
+- `ReviewForm` visibility is decided on the client. It reads the logged-in user from localStorage, calls `getOrdersByUser`, and keeps orders with status `DELIVERED` that contain the product. If none, it renders nothing. The orders come from `/api/orders/user/{id}` newest first, and the form is bound to the first one, which is the latest order. The dropdown is rendered only when there is more than one such order; it lists them in that same order and loads the latest on page load. With exactly one order there is no dropdown and the form is for that order. For the selected order the form pre-fills from the product's reviews matched by `orderId`, and shows Save and Delete when a review exists, otherwise Submit. A required rating is checked in the browser before submitting.
 - The backend still enforces eligibility independently, because the frontend check is only a UI convenience.
+
+## Vertical slices
+
+The work is split into thin end-to-end slices, each one leaving the app working and verifiable in the running webshop. The slice list and the individual tasks are in tasks.md; this is which layers each slice touches.
+
+| # | Slice (user-visible outcome) | Layers touched |
+|---|---|---|
+| 1 | Customer can give a star rating on the Details page (walking skeleton) | database (`Review`), service, API (`POST`), UI (form) |
+| 2 | Visitors can read the reviews | service and API (`GET` list, reviewer name), UI (`StarRating`, `ReviewList`) |
+| 3 | A product can be reviewed only once per order | database (unique constraint), service, UI (shows the refusal) |
+| 4 | Shoppers see the average rating on product cards | data access and API (summary), UI (card, `StarRating` variant) |
+| 5 | Customer can add an optional comment | API validation and service, UI (textarea, list) |
+| 6 | Only customers who received the product can review it | service rules; UI gate already exists, verified end to end |
+| 7 | Customer can choose which delivered order to review (only when there is more than one) | UI only; the backend already accepts a review per order |
+| 8 | Customer can edit their own review | service and API (`PUT`), UI (Save) |
+| 9 | Customer can delete their own review | service and API (`DELETE`), UI (Delete) |
+| 10 | Whole feature works together | integration check only |
 
 ## Risks / Trade-offs
 

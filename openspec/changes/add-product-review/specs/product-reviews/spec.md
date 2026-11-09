@@ -162,7 +162,8 @@ The details page SHALL show the review form below the "Add to Cart" button only 
 - **THEN** no review form and no message about reviewing is shown
 
 ### Requirement: Order selection in review form
-The review form SHALL show a single form with a dropdown listing the customer's delivered orders containing the product. Choosing an order SHALL load that order's existing review for editing or deleting, or an empty form if none exists. A star rating SHALL be required and the comment optional, limited to 250 characters.
+- **WHEN** A customer has more than one order containing the product
+- **THEN** The review form SHALL show a single form with a dropdown listing the customer's delivered orders containing the product. Choosing an order SHALL load that order's existing review for editing or deleting, or an empty form if none exists. A star rating SHALL be required and the comment optional, limited to 250 characters.
 
 #### Scenario: Several delivered orders
 - **WHEN** a customer has three delivered orders containing the product
