@@ -69,6 +69,9 @@ public class ReviewService {
         review.setOrder(order);
         review.setProduct(product);
         review.setRating(request.getRating());
+        // The comment is optional: an absent or blank comment is stored as "no comment".
+        String comment = request.getComment() == null ? "" : request.getComment().trim();
+        review.setComment(comment.isEmpty() ? null : comment);
         review.setCreatedAt(LocalDateTime.now());
         return new ReviewResponse(reviewRepository.save(review));
     }

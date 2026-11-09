@@ -21,11 +21,11 @@ Each group is one thin end-to-end slice (database, data access, service, API and
 ## 4. Shoppers can see the average rating on the product cards
 
 - [x] 4.1 Add `GET /api/reviews/summary` (one grouped query, average rounded to one decimal and count, products without reviews omitted). Verify with curl that ratings 5, 4, 4 give average 4.3 and count 3, and that an unreviewed product is absent. Use three different orders for the three reviews, since one review per order and product is now enforced.
-- [ ] 4.2 Add `getReviewSummary`, the greyed-out `StarRating` variant and the rating line on `ProductCard` below price and stock ("4.3 ★ (12 reviews)" with half-star rounding, or five grey stars and "No reviews in yet"), loading the summary once in `Products` and `Home`. Verify end to end in the browser on `/` and `/products`: a reviewed product shows 4 full stars, 1 half star and "4.3 ★ (3 reviews)" for ratings 5, 4, 4; an unreviewed one shows the grey state; a new review changes the average on reload; cards still render if the summary request fails.
+- [x] 4.2 Add `getReviewSummary`, the greyed-out `StarRating` variant and the rating line on `ProductCard` below price and stock ("4.3 ★ (12 reviews)" with half-star rounding, or five grey stars and "No reviews in yet"), loading the summary once in `Products` and `Home`. Verify end to end in the browser on `/` and `/products`: a reviewed product shows 4 full stars, 1 half star and "4.3 ★ (3 reviews)" for ratings 5, 4, 4; an unreviewed one shows the grey state; a new review changes the average on reload; cards still render if the summary request fails.
 
 ## 5. Customer can add an optional comment of up to 250 characters
 
-- [ ] 5.1 Add `comment` (`@Size(max = 250)`, optional) to the request, the service and the response. Verify with curl that no comment and an empty comment return 201, a 250-character comment returns 201, and a 251-character comment returns 400 with a message starting "comment: ". Use a fresh order for each request that should succeed.
+- [x] 5.1 Add `comment` (`@Size(max = 250)`, optional) to the request, the service and the response. Verify with curl that no comment and an empty comment return 201, a 250-character comment returns 201, and a 251-character comment returns 400 with a message starting "comment: ". Use a fresh order for each request that should succeed.
 - [ ] 5.2 Add the comment textarea (limit 250, with a character counter) to `ReviewForm` and show the comment in `ReviewList`. Verify end to end in the browser: submit a rating with a comment and see it in the list; submit a rating without a comment and see the review without a comment line; the textarea does not accept more than 250 characters.
 
 ## 6. Only customers who received the product can review it

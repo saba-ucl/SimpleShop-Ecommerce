@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createReview, getOrdersByUser } from '../services/api';
 
+const COMMENT_MAX_LENGTH = 250;
+
 function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem('simpleshopUser'));
@@ -13,6 +15,7 @@ function ReviewForm({ productId, onSubmitted }) {
   const [user] = useState(getStoredUser);
   const [order, setOrder] = useState(null);
   const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ function ReviewForm({ productId, onSubmitted }) {
     }
     setSubmitting(true);
     try {
-      await createReview({ userId: user.id, orderId: order.id, productId: Number(productId), rating });
+      await createReview({ userId: user.id, orderId: order.id, productId: Number(productId), rating, comment });
       setMessage('Thank you! Your review has been saved.');
       if (onSubmitted) onSubmitted();
     } catch (err) {
@@ -69,6 +72,19 @@ function ReviewForm({ productId, onSubmitted }) {
             ★
           </button>
         ))}
+      </div>
+      <div className="mb-3">
+        <label htmlFor="review-comment" className="form-label">Comment (optional)</label>
+        <textarea
+          id="review-comment"
+          className="form-control"
+          rows="3"
+          maxLength={COMMENT_MAX_LENGTH}
+          placeholder="Share a few words about this product"
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+        />
+        <div className="form-text text-end">{comment.length}/{COMMENT_MAX_LENGTH}</div>
       </div>
       {error && <div className="alert alert-danger py-2">{error}</div>}
       {message && <div className="alert alert-success py-2">{message}</div>}
