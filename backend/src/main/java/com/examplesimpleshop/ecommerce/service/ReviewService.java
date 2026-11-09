@@ -3,6 +3,7 @@ package com.examplesimpleshop.ecommerce.service;
 import com.examplesimpleshop.ecommerce.dto.ReviewRequest;
 import com.examplesimpleshop.ecommerce.dto.ReviewResponse;
 import com.examplesimpleshop.ecommerce.dto.ReviewSummaryResponse;
+import com.examplesimpleshop.ecommerce.dto.ReviewUpdateRequest;
 import com.examplesimpleshop.ecommerce.entity.Order;
 import com.examplesimpleshop.ecommerce.entity.OrderStatus;
 import com.examplesimpleshop.ecommerce.entity.Product;
@@ -84,10 +85,29 @@ public class ReviewService {
         review.setOrder(order);
         review.setProduct(product);
         review.setRating(request.getRating());
-        // The comment is optional: an absent or blank comment is stored as "no comment".
-        String comment = request.getComment() == null ? "" : request.getComment().trim();
-        review.setComment(comment.isEmpty() ? null : comment);
+        review.setComment(normalizeComment(request.getComment()));
         review.setCreatedAt(LocalDateTime.now());
         return new ReviewResponse(reviewRepository.save(review));
+    }
+
+    // Only the rating and comment can change. The order, product and created date stay as they were.
+    public ReviewResponse update(Long id, ReviewUpdateRequest request) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found with id: " + id));
+
+        // The customer is the owner of the reviewed order. Compared against the id sent by the client.
+        if (review.getOrder().getUser() == null || !review.getOrder().getUser().getId().equals(request.getUserId())) {
+            throw new IllegalArgumentException("You can only edit your own reviews.");
+        }
+
+        review.setRating(request.getRating());
+        review.setComment(normalizeComment(request.getComment()));
+        return new ReviewResponse(reviewRepository.save(review));
+    }
+
+    // The comment is optional: an absent or blank comment is stored as "no comment".
+    private String normalizeComment(String rawComment) {
+        String comment = rawComment == null ? "" : rawComment.trim();
+        return comment.isEmpty() ? null : comment;
     }
 }

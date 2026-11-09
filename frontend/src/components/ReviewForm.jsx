@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createReview, getOrdersByUser } from '../services/api';
-import StarRating from './StarRating';
+import { createReview, getOrdersByUser, updateReview } from '../services/api';
 
 const COMMENT_MAX_LENGTH = 250;
 
@@ -27,6 +26,11 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  // The review this customer already left for the selected order, if any.
+  const existingReview = reviews.find(
+    (review) => review.orderId === selectedOrderId && review.productId === Number(productId)
+  );
+
   useEffect(() => {
     if (!user?.id) return;
     getOrdersByUser(user.id)
@@ -44,20 +48,19 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
       });
   }, [user, productId]);
 
+  // Fill the form with the selected order's review, or empty it when that order has none yet.
+  useEffect(() => {
+    setRating(existingReview ? existingReview.rating : 0);
+    setComment(existingReview?.comment || '');
+  }, [selectedOrderId, existingReview?.id]);
+
   const handleOrderChange = (event) => {
     setSelectedOrderId(Number(event.target.value));
-    setRating(0);
-    setComment('');
     setMessage('');
     setError('');
   };
 
   if (!user?.id || orders.length === 0 || selectedOrderId === null) return null;
-
-  // The review this customer already left for the selected order, if any.
-  const existingReview = reviews.find(
-    (review) => review.orderId === selectedOrderId && review.productId === Number(productId)
-  );
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -69,8 +72,13 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
     }
     setSubmitting(true);
     try {
-      await createReview({ userId: user.id, orderId: selectedOrderId, productId: Number(productId), rating, comment });
-      setMessage('Thank you! Your review has been saved.');
+      if (existingReview) {
+        await updateReview(existingReview.id, { userId: user.id, rating, comment });
+        setMessage('Your review has been updated.');
+      } else {
+        await createReview({ userId: user.id, orderId: selectedOrderId, productId: Number(productId), rating, comment });
+        setMessage('Thank you! Your review has been saved.');
+      }
       if (onSubmitted) onSubmitted();
     } catch (err) {
       setError(err.response?.data?.message || 'Your review could not be saved.');
@@ -81,7 +89,7 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
 
   return (
     <section className="mt-4">
-      <h2 className="h5">Review this product</h2>
+      <h2 className="h5">{existingReview ? 'Your review' : 'Review this product'}</h2>
 
       {orders.length > 1 && (
         <div className="mb-3">
@@ -101,49 +109,41 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
 
       {message && <div className="alert alert-success py-2">{message}</div>}
 
-      {existingReview ? (
-        <div className="border rounded p-3">
-          <div className="text-secondary small mb-1">You have already reviewed this product for this order.</div>
-          <StarRating value={existingReview.rating} size="1.3rem" />
-          {existingReview.comment && <p className="mb-0 mt-2">{existingReview.comment}</p>}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-2" role="radiogroup" aria-label="Star rating">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              className="btn btn-link p-0 me-1 fs-3 text-decoration-none"
+              style={{ color: star <= rating ? '#f5a623' : '#ccc' }}
+              aria-label={`${star} star${star > 1 ? 's' : ''}`}
+              aria-checked={star === rating}
+              role="radio"
+              onClick={() => setRating(star)}
+            >
+              ★
+            </button>
+          ))}
         </div>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <div className="mb-2" role="radiogroup" aria-label="Star rating">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                className="btn btn-link p-0 me-1 fs-3 text-decoration-none"
-                style={{ color: star <= rating ? '#f5a623' : '#ccc' }}
-                aria-label={`${star} star${star > 1 ? 's' : ''}`}
-                aria-checked={star === rating}
-                role="radio"
-                onClick={() => setRating(star)}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="review-comment" className="form-label">Comment (optional)</label>
-            <textarea
-              id="review-comment"
-              className="form-control"
-              rows="3"
-              maxLength={COMMENT_MAX_LENGTH}
-              placeholder="Share a few words about this product"
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-            />
-            <div className="form-text text-end">{comment.length}/{COMMENT_MAX_LENGTH}</div>
-          </div>
-          {error && <div className="alert alert-danger py-2">{error}</div>}
-          <button type="submit" className="btn btn-outline-primary" disabled={submitting}>
-            Submit review
-          </button>
-        </form>
-      )}
+        <div className="mb-3">
+          <label htmlFor="review-comment" className="form-label">Comment (optional)</label>
+          <textarea
+            id="review-comment"
+            className="form-control"
+            rows="3"
+            maxLength={COMMENT_MAX_LENGTH}
+            placeholder="Share a few words about this product"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+          />
+          <div className="form-text text-end">{comment.length}/{COMMENT_MAX_LENGTH}</div>
+        </div>
+        {error && <div className="alert alert-danger py-2">{error}</div>}
+        <button type="submit" className="btn btn-outline-primary" disabled={submitting}>
+          {existingReview ? 'Save changes' : 'Submit review'}
+        </button>
+      </form>
     </section>
   );
 }
