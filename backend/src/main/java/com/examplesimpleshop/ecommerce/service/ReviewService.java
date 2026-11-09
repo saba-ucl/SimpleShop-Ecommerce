@@ -40,6 +40,12 @@ public class ReviewService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + request.getProductId()));
 
+        // One review per order and product, regardless of how many order lines hold the product.
+        // Checked here so the client gets a clear message instead of the generic integrity error.
+        if (reviewRepository.existsByOrderIdAndProductId(order.getId(), product.getId())) {
+            throw new IllegalArgumentException("You have already reviewed this product for this order.");
+        }
+
         Review review = new Review();
         review.setOrder(order);
         review.setProduct(product);
