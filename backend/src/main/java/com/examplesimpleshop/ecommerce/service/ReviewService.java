@@ -105,6 +105,19 @@ public class ReviewService {
         return new ReviewResponse(reviewRepository.save(review));
     }
 
+    // After deleting, the customer can review the same order and product again.
+    public void delete(Long id, Long userId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found with id: " + id));
+
+        // The customer is the owner of the reviewed order. Compared against the id sent by the client.
+        if (review.getOrder().getUser() == null || !review.getOrder().getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("You can only delete your own reviews.");
+        }
+
+        reviewRepository.delete(review);
+    }
+
     // The comment is optional: an absent or blank comment is stored as "no comment".
     private String normalizeComment(String rawComment) {
         String comment = rawComment == null ? "" : rawComment.trim();

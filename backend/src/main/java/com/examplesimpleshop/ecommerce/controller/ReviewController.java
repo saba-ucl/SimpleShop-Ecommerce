@@ -42,4 +42,11 @@ public class ReviewController {
     public ReviewResponse update(@PathVariable Long id, @Valid @RequestBody ReviewUpdateRequest request) {
         return reviewService.update(id, request);
     }
+
+    // userId is a query parameter because some clients drop the body of a DELETE request.
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id, @RequestParam Long userId) {
+        reviewService.delete(id, userId);
+    }
 }

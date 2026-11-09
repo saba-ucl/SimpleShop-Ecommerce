@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createReview, getOrdersByUser, updateReview } from '../services/api';
+import { createReview, deleteReview, getOrdersByUser, updateReview } from '../services/api';
 
 const COMMENT_MAX_LENGTH = 250;
 
@@ -87,6 +87,22 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
     }
   };
 
+  // After deleting, the reviews reload, this order has no review any more, and the form becomes empty again.
+  const handleDelete = async () => {
+    setMessage('');
+    setError('');
+    setSubmitting(true);
+    try {
+      await deleteReview(existingReview.id, user.id);
+      setMessage('Your review has been deleted.');
+      if (onSubmitted) onSubmitted();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Your review could not be deleted.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section className="mt-4">
       <h2 className="h5">{existingReview ? 'Your review' : 'Review this product'}</h2>
@@ -140,9 +156,16 @@ function ReviewForm({ productId, reviews = [], onSubmitted }) {
           <div className="form-text text-end">{comment.length}/{COMMENT_MAX_LENGTH}</div>
         </div>
         {error && <div className="alert alert-danger py-2">{error}</div>}
-        <button type="submit" className="btn btn-outline-primary" disabled={submitting}>
-          {existingReview ? 'Save changes' : 'Submit review'}
-        </button>
+        <div className="d-flex gap-2">
+          <button type="submit" className="btn btn-outline-primary" disabled={submitting}>
+            {existingReview ? 'Save changes' : 'Submit review'}
+          </button>
+          {existingReview && (
+            <button type="button" className="btn btn-outline-danger" disabled={submitting} onClick={handleDelete}>
+              Delete review
+            </button>
+          )}
+        </div>
       </form>
     </section>
   );

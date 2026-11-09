@@ -41,12 +41,12 @@ Each group is one thin end-to-end slice (database, data access, service, API and
 ## 8. Customer can edit their own review
 
 - [x] 8.1 Add `ReviewUpdateRequest` (`userId`, `rating`, `comment`), `ReviewService.update` (owner check against the order's user; only rating and comment change) and `PUT /api/reviews/{id}`. Verify with curl: the owner's update returns 200 and the list and summary reflect it; another user's update returns 400 and leaves the review unchanged; an invalid rating or a 251-character comment returns 400.
-- [ ] 8.2 Add `updateReview` to `api.js` and make `ReviewForm` editable for an already-reviewed order with a Save button. Verify end to end in the browser: change 4 stars to 2 and edit the comment, save, and see the list and the product card average change without a reload.
+- [x] 8.2 Add `updateReview` to `api.js` and make `ReviewForm` editable for an already-reviewed order with a Save button. Verify end to end in the browser: change 4 stars to 2 and edit the comment, save, and see the list and the product card average change without a reload.
 
 ## 9. Customer can delete their own review
 
-- [ ] 9.1 Add `ReviewService.delete` (owner check) and `DELETE /api/reviews/{id}?userId=`. Verify with curl: the owner's delete succeeds and the review leaves the list and the summary; another user's delete returns 400 and the review remains; a new review for the same order and product can then be created.
-- [ ] 9.2 Add `deleteReview` to `api.js` and a Delete button on `ReviewForm` for an already-reviewed order. Verify end to end in the browser: delete a review, see it disappear from the list, see the card average update (or return to "No reviews in yet" when it was the only one), and see an empty form for that order that accepts a new review.
+- [x] 9.1 Add `ReviewService.delete` (owner check) and `DELETE /api/reviews/{id}?userId=`. Verify with curl: the owner's delete succeeds and the review leaves the list and the summary; another user's delete returns 400 and the review remains; a new review for the same order and product can then be created.
+- [x] 9.2 Add `deleteReview` to `api.js` and a Delete button on `ReviewForm` for an already-reviewed order. Verify end to end in the browser: delete a review, see it disappear from the list, see the card average update (or return to "No reviews in yet" when it was the only one), and see an empty form for that order that accepts a new review.
 
 ## 10. Whole feature works together
 

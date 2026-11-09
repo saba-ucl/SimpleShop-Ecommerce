@@ -35,6 +35,7 @@ export const updateOrderStatus = (id, status) => api.put(`/orders/${id}/status`,
 
 export const getReviews = (productId) => api.get('/reviews', { params: { productId } });
 export const updateReview = (id, data) => api.put(`/reviews/${id}`, data);
+export const deleteReview = (id, userId) => api.delete(`/reviews/${id}`, { params: { userId } });
 export const getReviewSummary =() => api.get('/reviews/summary');
 export const createReview =(data) => api.post('/reviews', data);
 
