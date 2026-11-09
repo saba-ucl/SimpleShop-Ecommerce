@@ -50,7 +50,7 @@ Each group is one thin end-to-end slice (database, data access, service, API and
 
 ## 10. Whole feature works together
 
-- [ ] 10.1 Run through every scenario in `specs/product-reviews/spec.md` against the running app, restart the backend to confirm it starts clean with the in-memory database, and confirm the existing product, order and admin pages still work. Verify `openspec validate add-product-review --strict` passes.
+- [x] 10.1 Run through every scenario in `specs/product-reviews/spec.md` against the running app, restart the backend to confirm it starts clean with the in-memory database, and confirm the existing product, order and admin pages still work. Verify `openspec validate add-product-review --strict` passes.
 
 ## Workflow follow-up
 
