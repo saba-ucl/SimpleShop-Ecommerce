@@ -4,6 +4,7 @@ import com.examplesimpleshop.ecommerce.dto.ReviewRequest;
 import com.examplesimpleshop.ecommerce.dto.ReviewResponse;
 import com.examplesimpleshop.ecommerce.dto.ReviewSummaryResponse;
 import com.examplesimpleshop.ecommerce.entity.Order;
+import com.examplesimpleshop.ecommerce.entity.OrderStatus;
 import com.examplesimpleshop.ecommerce.entity.Product;
 import com.examplesimpleshop.ecommerce.entity.Review;
 import com.examplesimpleshop.ecommerce.repository.OrderRepository;
@@ -58,6 +59,20 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + request.getOrderId()));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + request.getProductId()));
+
+        // Only a customer who has received the product can review it. Checked in this order.
+        if (order.getUser() == null || !order.getUser().getId().equals(request.getUserId())) {
+            throw new IllegalArgumentException("You can only review products from your own orders.");
+        }
+        if (order.getStatus() != OrderStatus.DELIVERED) {
+            throw new IllegalArgumentException("You can only review products from delivered orders.");
+        }
+        // Several order lines with the same product count as one: it is enough that one line has it.
+        boolean productOnOrder = order.getItems().stream()
+                .anyMatch(item -> item.getProduct().getId().equals(product.getId()));
+        if (!productOnOrder) {
+            throw new IllegalArgumentException("This product is not part of the order.");
+        }
 
         // One review per order and product, regardless of how many order lines hold the product.
         // Checked here so the client gets a clear message instead of the generic integrity error.
