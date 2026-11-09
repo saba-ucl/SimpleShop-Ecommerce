@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getProduct } from '../services/api';
+import { getProduct, getReviews } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
+import ReviewForm from '../components/ReviewForm';
+import ReviewList from '../components/ReviewList';
 import { formatPrice } from '../utils/currency';
 
 function ProductDetails({ onAddToCart }) {
@@ -11,12 +13,20 @@ function ProductDetails({ onAddToCart }) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviews, setReviews] = useState([]);
+
+  const loadReviews = () => {
+    getReviews(id)
+      .then((response) => setReviews(response.data))
+      .catch(() => setReviews([]));
+  };
 
   useEffect(() => {
     getProduct(id)
       .then((response) => setProduct(response.data))
       .catch(() => setError('Product could not be found.'))
       .finally(() => setLoading(false));
+    loadReviews();
   }, [id]);
 
   if (loading) return <main className="container py-5"><Loading message="Loading product..." /></main>;
@@ -61,8 +71,12 @@ function ProductDetails({ onAddToCart }) {
               </div>
             </div>
           )}
+
+          <ReviewForm productId={product.id} onSubmitted={loadReviews} />
         </div>
       </div>
+
+      <ReviewList reviews={reviews} />
     </main>
   );
 }
