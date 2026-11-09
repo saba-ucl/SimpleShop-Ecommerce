@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../utils/currency';
+import StarRating from './StarRating';
 
-function ProductCard({ product, onAddToCart }) {
+function ProductCard({ product, onAddToCart, summary }) {
   const outOfStock = product.stock <= 0;
 
   return (
@@ -29,6 +30,21 @@ function ProductCard({ product, onAddToCart }) {
           <span className={`small ${outOfStock ? 'text-danger' : 'text-success'}`}>
             {outOfStock ? 'Out of Stock' : `${product.stock} left`}
           </span>
+        </div>
+        <div className="mb-3 small d-flex align-items-center gap-2 flex-wrap">
+          {summary && summary.count > 0 ? (
+            <>
+              <StarRating value={Math.round(summary.average * 2) / 2} size="1.1rem" />
+              <span className="text-secondary">
+                {summary.average.toFixed(1)} ★ ({summary.count} {summary.count === 1 ? 'review' : 'reviews'})
+              </span>
+            </>
+          ) : (
+            <>
+              <StarRating muted size="1.1rem" />
+              <span className="text-secondary">No reviews in yet</span>
+            </>
+          )}
         </div>
         <div className="d-flex gap-2">
           <Link to={`/products/${product.id}`} className="btn btn-outline-primary flex-fill">

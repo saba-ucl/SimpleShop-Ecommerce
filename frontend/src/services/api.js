@@ -34,6 +34,7 @@ export const createOrder = (data) => api.post('/orders', data);
 export const updateOrderStatus = (id, status) => api.put(`/orders/${id}/status`, { status });
 
 export const getReviews = (productId) => api.get('/reviews', { params: { productId } });
+export const getReviewSummary = () => api.get('/reviews/summary');
 export const createReview =(data) => api.post('/reviews', data);
 
 export const getDashboardCounts = () => api.get('/dashboard/counts');

@@ -2,12 +2,14 @@ package com.examplesimpleshop.ecommerce.controller;
 
 import com.examplesimpleshop.ecommerce.dto.ReviewRequest;
 import com.examplesimpleshop.ecommerce.dto.ReviewResponse;
+import com.examplesimpleshop.ecommerce.dto.ReviewSummaryResponse;
 import com.examplesimpleshop.ecommerce.service.ReviewService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -22,6 +24,11 @@ public class ReviewController {
     @GetMapping
     public List<ReviewResponse> getByProduct(@RequestParam Long productId) {
         return reviewService.getByProduct(productId);
+    }
+
+    @GetMapping("/summary")
+    public Map<Long, ReviewSummaryResponse> getSummaries() {
+        return reviewService.getSummaries();
     }
 
     @PostMapping

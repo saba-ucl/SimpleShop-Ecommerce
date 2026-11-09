@@ -1,7 +1,11 @@
 package com.examplesimpleshop.ecommerce.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -12,6 +16,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -39,8 +45,17 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleUnexpected(Exception ex) {
-        return Map.of("message", "An unexpected server error occurred.");
+    public ResponseEntity<Map<String, String>> handleUnexpected(Exception ex) {
+        // Spring's own web errors already know their HTTP status, for example
+        // 404 for a URL that does not exist, or 405 for GET on a POST-only endpoint.
+        if (ex instanceof ErrorResponse errorResponse) {
+            return ResponseEntity.status(errorResponse.getStatusCode())
+                    .body(Map.of("message", ex.getMessage()));
+        }
+
+        // Real bugs: print the full stack trace in the backend console.
+        log.error("Unexpected server error", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "An unexpected server error occurred."));
     }
 }

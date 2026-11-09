@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getCategories, getProducts } from '../services/api';
+import { getCategories, getProducts, getReviewSummary } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import Loading from '../components/Loading';
 import ErrorMessage from '../components/ErrorMessage';
@@ -8,6 +8,7 @@ import ErrorMessage from '../components/ErrorMessage';
 function Home({ onAddToCart }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [summaries, setSummaries] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,6 +20,11 @@ function Home({ onAddToCart }) {
       })
       .catch(() => setError('Could not load the home page data. Make sure the backend is running.'))
       .finally(() => setLoading(false));
+
+    // Ratings are optional: if this fails, the cards simply show the "no reviews" state.
+    getReviewSummary()
+      .then((response) => setSummaries(response.data))
+      .catch(() => setSummaries({}));
   }, []);
 
   return (
@@ -91,7 +97,7 @@ function Home({ onAddToCart }) {
               <div className="row g-4">
                 {products.slice(0, 4).map((product) => (
                   <div className="col-sm-6 col-lg-3" key={product.id}>
-                    <ProductCard product={product} onAddToCart={onAddToCart} />
+                    <ProductCard product={product} onAddToCart={onAddToCart} summary={summaries[product.id]} />
                   </div>
                 ))}
               </div>

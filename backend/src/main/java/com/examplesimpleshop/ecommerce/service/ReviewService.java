@@ -2,6 +2,7 @@ package com.examplesimpleshop.ecommerce.service;
 
 import com.examplesimpleshop.ecommerce.dto.ReviewRequest;
 import com.examplesimpleshop.ecommerce.dto.ReviewResponse;
+import com.examplesimpleshop.ecommerce.dto.ReviewSummaryResponse;
 import com.examplesimpleshop.ecommerce.entity.Order;
 import com.examplesimpleshop.ecommerce.entity.Product;
 import com.examplesimpleshop.ecommerce.entity.Review;
@@ -10,8 +11,12 @@ import com.examplesimpleshop.ecommerce.repository.ProductRepository;
 import com.examplesimpleshop.ecommerce.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewService {
@@ -32,6 +37,20 @@ public class ReviewService {
         return reviewRepository.findByProductIdOrderByCreatedAtDescIdDesc(productId).stream()
                 .map(ReviewResponse::new)
                 .toList();
+    }
+
+    // Average (one decimal) and count per product. Products without reviews are not included.
+    public Map<Long, ReviewSummaryResponse> getSummaries() {
+        Map<Long, ReviewSummaryResponse> summaries = new LinkedHashMap<>();
+        for (Object[] row : reviewRepository.findRatingSummaries()) {
+            Long productId = ((Number) row[0]).longValue();
+            double average = BigDecimal.valueOf(((Number) row[1]).doubleValue())
+                    .setScale(1, RoundingMode.HALF_UP)
+                    .doubleValue();
+            long count = ((Number) row[2]).longValue();
+            summaries.put(productId, new ReviewSummaryResponse(average, count));
+        }
+        return summaries;
     }
 
     public ReviewResponse create(ReviewRequest request) {
