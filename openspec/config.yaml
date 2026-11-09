@@ -12,6 +12,26 @@ context: |
   Prices are stored in DKK. The only automated test is a Spring context-load test, so
   tasks should include manual or curl verification steps.
 
+
+rules:
+  tasks:
+    - Break the work down using vertical slicing. Each task group is one thin,
+      end-to-end increment of user-visible functionality, not one technical layer.
+    - Every increment must include the changes needed in every affected layer
+      (database, data access, business logic, API, UI), so it can be verified end to end.
+    - Never create layer-only increments such as "create all database tables" or
+      "build all API endpoints".
+    - Order increments so the first one is the simplest working end-to-end path
+      (walking skeleton), and each following increment adds one behavior or rule.
+    - End each increment with a verification task that tests the slice end to end
+      (an automated test, or manual steps in the running webshop).
+    - Name each increment after the user-visible outcome, e.g.
+      "Customer can give a star rating on the Details page".
+    - Each increment should leave the application in a working, deployable state.
+  design:
+    - Describe how the feature can be split into thin vertical slices, and which
+      layers each slice touches.
+      
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
