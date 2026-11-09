@@ -72,7 +72,7 @@ function ProductDetails({ onAddToCart }) {
             </div>
           )}
 
-          <ReviewForm productId={product.id} onSubmitted={loadReviews} />
+          <ReviewForm productId={product.id} reviews={reviews} onSubmitted={loadReviews} />
         </div>
       </div>
 
